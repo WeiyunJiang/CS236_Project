@@ -34,3 +34,4 @@ def get_dataloaders(data_dir, imsize, batch_size, eval_size, num_workers=1):
     )
 
     return train_dataloader, eval_dataloader
+

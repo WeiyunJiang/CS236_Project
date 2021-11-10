@@ -51,10 +51,19 @@ class AnimeDataset(Dataset):
         sample = {'sketch': sketch, 'colored': colored}
         return sample
 if __name__ == "__main__":
-    animedataset = AnimeDataset()
-    sample  = animedataset[2]
-    plt.figure()
-    plt.imshow(sample['sketch'].permute(1,2,0))
-    plt.figure()
-    plt.imshow(sample['colored'].permute(1,2,0))
+
+    
+    train_dataset = AnimeDataset(split='train')
+    
+    # train_dataset[0]
+    
+    train_data_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
+    
+    
+    for i, batch in enumerate(train_data_loader):
+        print(i)
+        print(batch['sketch'].shape) # 64, 3, 64, 64
+        plt.figure()
+        plt.imshow(batch['sketch'][0].permute(1,2,0))
+
     pass
