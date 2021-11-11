@@ -256,6 +256,7 @@ class cDiscriminator64(nn.Module):
             ConvBlock(32,64),  #(-1, 96, 4, 4)
             # ConvBlock(96,192), #(-1, 192, 2, 2)
             nn.Conv2d(64,1,kernel_size=4,stride=1,padding=0),#(-1, 1, 1,1)
+            nn.Sigmoid(),
         )
     def forward(self,x,y):
         x=x.view(-1, 3, 64, 64)
@@ -263,6 +264,7 @@ class cDiscriminator64(nn.Module):
         concat=torch.cat([x,y], 1) #(-1, 6, 64, 64)
         out=self.model(concat) # 
         label=out.view(-1,1)
+        
         return label #real/fake
 
 if __name__ == "__main__":
