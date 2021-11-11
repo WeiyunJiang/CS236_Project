@@ -256,7 +256,7 @@ class cDiscriminator64(nn.Module):
             ConvBlock(48,96),  #(-1, 96, 4, 4)
             ConvBlock(96,192), #(-1, 192, 2, 2)
             nn.Conv2d(192,1,kernel_size=2,stride=1,padding=0),#(-1, 1, 1,1)
-            
+            nn.Sigmoid(),
         )
     def forward(self,x,y):
         x=x.view(-1, 3, 64, 64)

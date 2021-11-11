@@ -74,12 +74,17 @@ def compute_loss_g(net_g, net_d, sketch, colored_real, loss_func_g):
     """
     General implementation to compute generator loss.
     """
+    criterion = nn.BCELoss()
+    real_label = 1.
+    fake_label = 0.
+
     loss_l1 = nn.L1Loss()
     fakes = net_g(sketch)
     fake_preds = net_d(sketch, fakes).view(-1)
     
     # loss_g = loss_func_g(fake_preds) + 100 * loss_l1(fakes, colored_real)
-    loss_g = loss_func_g(fake_preds)                             
+    #loss_g = loss_func_g(fake_preds)                             
+    loss_g = criterion(fake_preds, )
     return loss_g, fakes, fake_preds
 
 
