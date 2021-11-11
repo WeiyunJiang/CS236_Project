@@ -78,14 +78,14 @@ def compute_loss_g(net_g, net_d, sketch, colored_real, loss_func_g, device):
     fake_label = 0.
     criterion = nn.BCELoss()
     b_size = colored_real.size(0)
-    label = torch.full((b_size,), real_label, dtype=torch.float, device=device)
+    label_real = torch.full((b_size,), real_label, dtype=torch.float, device=device)
     loss_l1 = nn.L1Loss()
     fakes = net_g(sketch)
     fake_preds = net_d(sketch, fakes).view(-1)
     
     # loss_g = loss_func_g(fake_preds) + 100 * loss_l1(fakes, colored_real)
     #loss_g = loss_func_g(fake_preds)                             
-    loss_g = criterion(fake_preds, label)
+    loss_g = criterion(fake_preds, label_real)
     return loss_g, fakes, fake_preds
 
 
@@ -97,15 +97,15 @@ def compute_loss_d(net_g, net_d, colored_real, sketch, loss_func_d, device):
     fake_label = 0.
     criterion = nn.BCELoss()
     b_size = colored_real.size(0)
-    label = torch.full((b_size,), real_label, dtype=torch.float, device=device)
+    label_real = torch.full((b_size,), real_label, dtype=torch.float, device=device)
     
     real_preds = net_d(sketch, colored_real).view(-1)
-    errD_real = criterion(real_preds, label)
+    errD_real = criterion(real_preds, label_real)
     
-    label.fill_(fake_label)
+    label_fake = torch.full((b_size,), fake_label, dtype=torch.float, device=device)
     fakes = net_g(sketch).detach()
     fake_preds = net_d(sketch, fakes).view(-1)
-    errD_fake = criterion(fake_preds, label)
+    errD_fake = criterion(fake_preds, label_fake)
     # loss_d = loss_func_d(real_preds, fake_preds)
     loss_d = errD_real + errD_fake
 
