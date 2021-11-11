@@ -74,9 +74,15 @@ def compute_loss_g(net_g, net_d, sketch, colored_real, loss_func_g, device):
     """
     General implementation to compute generator loss.
     """
-    real_label = 0.
-    fake_label = 1.
-    criterion = nn.BCELoss()
+<<<<<<< HEAD
+    # real_label = 0.
+    # fake_label = 1.
+    # criterion = nn.BCELoss()
+=======
+    real_label = 1.
+    fake_label = 0.
+    criterion = nn.BCEWithLogitsLoss()
+>>>>>>> 093f1dc6ec1c65587dc5a09baff31c1c070e44bd
     b_size = colored_real.size(0)
     label_real = torch.full((b_size,), real_label, dtype=torch.float, device=device)
     loss_l1 = nn.L1Loss()
@@ -94,9 +100,15 @@ def compute_loss_d(net_g, net_d, colored_real, sketch, loss_func_d, device):
     General implementation to compute discriminator loss.
     """
     b_size = colored_real.size(0)
-    real_label = torch.FloatTensor(b_size, ).uniform_(0.0, 0.1).to(device)
-    fake_label = torch.FloatTensor(b_size, ).uniform_(0.9, 1.0).to(device)
-    criterion = nn.BCELoss()
+<<<<<<< HEAD
+    # real_label = torch.FloatTensor(b_size, ).uniform_(0.0, 0.1).to(device)
+    # fake_label = torch.FloatTensor(b_size, ).uniform_(0.9, 1.0).to(device)
+    # criterion = nn.BCELoss()
+=======
+    real_label = torch.FloatTensor(b_size, ).uniform_(0.9, 1.0).to(device)
+    fake_label = torch.FloatTensor(b_size, ).uniform_(0.0, 0.1).to(device)
+    criterion = nn.BCEWithLogitsLoss()
+>>>>>>> 093f1dc6ec1c65587dc5a09baff31c1c070e44bd
     
     
     real_preds = net_d(sketch, colored_real).view(-1)
