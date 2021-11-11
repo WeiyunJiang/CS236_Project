@@ -243,3 +243,56 @@ class DBlockOptimized(nn.Module):
 
     def forward(self, x):
         return self._residual(x) + self._shortcut(x)
+    
+class ConvBlock(nn.Module):
+    """
+    Downsampling
+    Classical conv - leakyReLU - batchnorm block
+    Attributes:
+        in_channels (int): The channel size of input feature map.
+        out_channels (int): The channel size of output feature map.
+        kernel_size (int): The kernel size
+        stride (int): The stride
+        padding (int): The padding
+    """
+    def __init__(self, in_channels, out_channels, kernel_size=4, stride=2, padding=1):
+        super(ConvBlock, self).__init__()
+        self.ConvBlock = nn.Sequential(
+            nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding),
+            nn.LeakyReLU(0.2),
+            nn.BatchNorm2d(out_channels)
+            ) 
+        
+    def forward(self, x):
+        out = self.ConvBlock(x)
+        return out
+
+class ConvTranBlock(nn.Module):
+    """
+    Upsampling
+    Classical transconv - leakyReLU - batchnorm block
+    Attributes:
+        in_channels (int): The channel size of input feature map.
+        out_channels (int): The channel size of output feature map.
+        kernel_size (int): The kernel size
+        stride (int): The stride
+        padding (int): The padding
+    """
+    def __init__(self, in_channels, out_channels, kernel_size=4, stride=2, padding=1):
+          super(ConvTranBlock, self).__init__()
+          self.ConvTranBlock=nn.Sequential(
+              nn.ConvTranspose2d(in_channels, out_channels, kernel_size, stride, padding),
+              # nn.ReLU(),
+              nn.LeakyReLU(0.2),
+              nn.BatchNorm2d(out_channels)
+              )
+          
+    def forward(self, x):
+        out = self.ConvTranBlock(x)
+        return out
+
+if __name__ == "__main__":
+    convtran = ConvBlock(3, 16)
+    
+    input_x = torch.zeros((60, 3, 64, 64))
+    out = convtran(input_x)
