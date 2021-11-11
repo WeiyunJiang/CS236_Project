@@ -184,27 +184,27 @@ class Discriminator64(nn.Module):
 #         output=self.dec_layer7(dec6)
     
 #         return output
-class cDiscriminator64_old(nn.Module):
-    # x is the sketch
-    # y is the colored on (real or fake)
-    def __init__(self):
-        super(cDiscriminator64_old, self).__init__()
-        self.model=nn.Sequential(
-            ConvBlock(6,8),
-            ConvBlock(8,16),
-            ConvBlock(16,32),
-            ConvBlock(32,64),
-            ConvBlock(64,128),
-            nn.Conv2d(128,1,kernel_size=4,stride=1,padding=0),
-            nn.Sigmoid()
-        )
-    def forward(self,x,y):
-        x=x.view(-1,3,128,128)
-        y=y.view(-1,3,128,128)
-        concat=torch.cat([x,y],1)
-        out=self.model(concat)
-        label=out.view(-1,1)
-        return label #real/fake    
+# class cDiscriminator64_old(nn.Module):
+#     # x is the sketch
+#     # y is the colored on (real or fake)
+#     def __init__(self):
+#         super(cDiscriminator64_old, self).__init__()
+#         self.model=nn.Sequential(
+#             ConvBlock(6,8),
+#             ConvBlock(8,16),
+#             ConvBlock(16,32),
+#             ConvBlock(32,64),
+#             ConvBlock(64,128),
+#             nn.Conv2d(128,1,kernel_size=4,stride=1,padding=0),
+#             nn.Sigmoid()
+#         )
+#     def forward(self,x,y):
+#         x=x.view(-1,3,128,128)
+#         y=y.view(-1,3,128,128)
+#         concat=torch.cat([x,y],1)
+#         out=self.model(concat)
+#         label=out.view(-1,1)
+#         return label #real/fake    
     
 class cGenerator64(nn.Module):
     def __init__(self):
@@ -256,7 +256,7 @@ class cDiscriminator64(nn.Module):
             ConvBlock(48,96),  #(-1, 96, 4, 4)
             ConvBlock(96,192), #(-1, 192, 2, 2)
             nn.Conv2d(192,1,kernel_size=2,stride=1,padding=0),#(-1, 1, 1,1)
-            nn.Sigmoid() # (-1, 1, 1, 1)
+            
         )
     def forward(self,x,y):
         x=x.view(-1, 3, 64, 64)

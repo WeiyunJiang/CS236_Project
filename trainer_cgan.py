@@ -78,8 +78,8 @@ def compute_loss_g(net_g, net_d, sketch, colored_real, loss_func_g):
     fakes = net_g(sketch)
     fake_preds = net_d(sketch, fakes).view(-1)
     
-    loss_g = loss_func_g(fake_preds) + 100 * loss_l1(fakes, colored_real)
-                                 
+    # loss_g = loss_func_g(fake_preds) + 100 * loss_l1(fakes, colored_real)
+    loss_g = loss_func_g(fake_preds)                             
     return loss_g, fakes, fake_preds
 
 
