@@ -1,3 +1,12 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+train script for conditional gan
+Created on Wed Nov 10 16:59:22 2021
+
+@author: weiyunjiang
+"""
+
 import os
 import pprint
 import argparse
@@ -35,8 +44,8 @@ def parse_args():
     parser.add_argument(
         "--name",
         type=str,
-        default="baseline_mine",
         # required=True,
+        default="cGan",
         help=(
             "Name of the current experiment."
             "Checkpoints will be stored in '{out_dir}/{name}/ckpt/'. "
@@ -60,7 +69,7 @@ def parse_args():
     parser.add_argument(
         "--im_size",
         type=int,
-        default=32,
+        default=64,
         help=(
             "Images are resized to this resolution. "
             "Models are automatically selected based on resolution."
@@ -135,15 +144,13 @@ def train(args):
     torch.manual_seed(args.seed)
 
     # Set parameters
-    nz, lr, betas, eval_size, num_workers = (128, 2e-4, (0.0, 0.9), 1000, 4)
+    nz, lr, betas, train_size, eval_size, num_workers = (128, 2e-4, (0.0, 0.9),10000, 1000, 2)
 
     # Configure models
-    if args.im_size == 32:
-        net_g = Generator32()
-        net_d = Discriminator32()
-    elif args.im_size == 64:
-        net_g = Generator64()
-        net_d = Discriminator64()
+    
+    if args.im_size == 64:
+        net_g = cGenerator64()
+        net_d = cDiscriminator64()
     else:
         raise NotImplementedError(f"Unsupported image size '{args.im_size}'.")
 
@@ -160,8 +167,8 @@ def train(args):
     )
 
     # Configure dataloaders
-    train_dataloader, eval_dataloader = util.get_dataloaders(
-        args.data_dir, args.im_size, args.batch_size, eval_size, num_workers
+    train_dataloader, eval_dataloader = util.get_dataloaders_cgan(
+        args.data_dir, args.im_size, args.batch_size, train_size, eval_size, num_workers
     )
 
     # Configure trainer
@@ -174,7 +181,6 @@ def train(args):
         sch_d,
         train_dataloader,
         eval_dataloader,
-        nz,
         log_dir,
         ckpt_dir,
         torch.device(args.device),

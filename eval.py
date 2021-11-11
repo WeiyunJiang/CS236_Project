@@ -125,7 +125,7 @@ def eval(args):
 
     else:
         # Evaluate models
-        metrics = evaluate(net_g, net_d, eval_dataloader, nz, args.device)
+        metrics, _ = evaluate(net_g, net_d, eval_dataloader, nz, args.device)
         pprint.pprint(metrics)
 
 
