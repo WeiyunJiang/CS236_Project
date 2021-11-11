@@ -16,7 +16,7 @@ import torch.optim as optim
 
 import util
 from model import *
-from trainer import Trainer
+from trainer_cgan import Trainer
 
 
 def parse_args():
@@ -144,7 +144,7 @@ def train(args):
     torch.manual_seed(args.seed)
 
     # Set parameters
-    nz, lr, betas, train_size, eval_size, num_workers = (128, 2e-4, (0.0, 0.9),10000, 1000, 2)
+    nz, lr, betas, train_size, eval_size, num_workers = (128, 1e-4, (0.0, 0.9),13000, 1000, 2)
 
     # Configure models
     

@@ -21,7 +21,7 @@ from torchmetrics import IS, FID, KID
 
 
 def prepare_data_for_inception(x, device):
-    r"""
+    """
     Preprocess data to be feed into the Inception model.
     """
     
@@ -34,9 +34,10 @@ def prepare_data_for_inception(x, device):
 
 
 def prepare_data_for_cgan(data, device):
-    r"""
+    """
     Helper function to prepare inputs for model.
     """
+    #print(type(data))
     sketch = data['sketch'].to(device)
     colored = data['colored'].to(device)
     return (
@@ -46,7 +47,7 @@ def prepare_data_for_cgan(data, device):
 
 
 def compute_prob(logits):
-    r"""
+    """
     Computes probability from model output.
     """
 
@@ -54,7 +55,7 @@ def compute_prob(logits):
 
 
 def hinge_loss_g(fake_preds):
-    r"""
+    """
     Computes generator hinge loss.
     """
 
@@ -62,27 +63,28 @@ def hinge_loss_g(fake_preds):
 
 
 def hinge_loss_d(real_preds, fake_preds):
-    r"""
+    """
     Computes discriminator hinge loss.
     """
 
     return F.relu(1.0 - real_preds).mean() + F.relu(1.0 + fake_preds).mean()
 
 
-def compute_loss_g(net_g, net_d, sketch, loss_func_g):
-    r"""
+def compute_loss_g(net_g, net_d, sketch, colored_real, loss_func_g):
+    """
     General implementation to compute generator loss.
     """
-
+    loss_l1 = nn.L1Loss()
     fakes = net_g(sketch)
     fake_preds = net_d(sketch, fakes).view(-1)
-    loss_g = loss_func_g(fake_preds)
-
+    
+    loss_g = loss_func_g(fake_preds) + 100 * loss_l1(fakes, colored_real)
+                                 
     return loss_g, fakes, fake_preds
 
 
 def compute_loss_d(net_g, net_d, colored_real, sketch, loss_func_d):
-    r"""
+    """
     General implementation to compute discriminator loss.
     """
 
@@ -95,7 +97,7 @@ def compute_loss_d(net_g, net_d, colored_real, sketch, loss_func_d):
 
 
 def train_step(net, opt, sch, compute_loss):
-    r"""
+    """
     General implementation to perform a training step.
     """
 
@@ -110,7 +112,7 @@ def train_step(net, opt, sch, compute_loss):
 
 
 def evaluate(net_g, net_d, dataloader, device):
-    r"""
+    """
     Evaluates model and logs metrics.
     Attributes:
         net_g (Module): Torch generator model.
@@ -137,7 +139,7 @@ def evaluate(net_g, net_d, dataloader, device):
             [],
         )
 
-        for data, _ in tqdm(dataloader, desc="Evaluating Model"):
+        for _, data in enumerate(tqdm(dataloader, desc="Evaluating Model")):
 
             # Compute losses and save intermediate outputs
             sketch, colored_real = prepare_data_for_cgan(data, device)
@@ -191,7 +193,7 @@ def evaluate(net_g, net_d, dataloader, device):
 
 
 class Trainer:
-    r"""
+    """
     Trainer performs GAN training, checkpointing and logging.
     Attributes:
         net_g (Module): Torch generator model.
@@ -263,7 +265,7 @@ class Trainer:
         self.step = state_dict["step"]
 
     def _load_checkpoint(self):
-        r"""
+        """
         Finds the last checkpoint in ckpt_dir and load states.
         """
 
@@ -274,7 +276,7 @@ class Trainer:
             self._load_state_dict(torch.load(ckpt_path))
 
     def _save_checkpoint(self):
-        r"""
+        """
         Saves model, optimizer and trainer states.
         """
 
@@ -291,8 +293,8 @@ class Trainer:
         self.logger.add_image("Samples", samples, self.step)
         self.logger.flush()
 
-    def _train_step_g(self, sketch):
-        r"""
+    def _train_step_g(self, sketch, colored_real):
+        """
         Performs a generator training step.
         """
 
@@ -304,12 +306,13 @@ class Trainer:
                 self.net_g,
                 self.net_d,
                 sketch,
+                colored_real,
                 hinge_loss_g,
             )[0],
         )
 
     def _train_step_d(self, colored_real, sketch):
-        r"""
+        """
         Performs a discriminator training step.
         """
 
@@ -327,7 +330,7 @@ class Trainer:
         )
 
     def train(self, max_steps, repeat_d, eval_every, ckpt_every):
-        r"""
+        """
         Performs GAN training, checkpointing and logging.
         Attributes:
             max_steps (int): Number of steps before stopping.
@@ -340,14 +343,15 @@ class Trainer:
 
         while True:
             pbar = tqdm(self.train_dataloader)
-            for data, _ in pbar:
+            for _, data in enumerate(pbar):
 
                 # Training step
                 # reals, z = prepare_data_for_gan(data, self.nz, self.device)
+                #print(data)
                 sketch, colored_real = prepare_data_for_cgan(data, self.device)
                 loss_d = self._train_step_d(colored_real, sketch)
                 if self.step % repeat_d == 0:
-                    loss_g = self._train_step_g(sketch)
+                    loss_g = self._train_step_g(sketch, colored_real)
 
                 pbar.set_description(
                     f"L(G):{loss_g.item():.2f}|L(D):{loss_d.item():.2f}|{self.step}/{max_steps}"
