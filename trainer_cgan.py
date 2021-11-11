@@ -327,6 +327,7 @@ class Trainer:
                 sketch,
                 colored_real,
                 hinge_loss_g,
+                self.device,
             )[0],
         )
 
@@ -345,6 +346,7 @@ class Trainer:
                 colored_real,
                 sketch,
                 hinge_loss_d,
+                self.device,
             )[0],
         )
 
