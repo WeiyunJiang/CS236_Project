@@ -94,8 +94,8 @@ def compute_loss_d(net_g, net_d, colored_real, sketch, loss_func_d, device):
     General implementation to compute discriminator loss.
     """
     b_size = colored_real.size(0)
-    real_label = torch.FloatTensor(b_size, ).uniform_(0.0, 0.1)
-    fake_label = torch.FloatTensor(b_size, ).uniform_(0.9, 1.0)
+    real_label = torch.FloatTensor(b_size, ).uniform_(0.0, 0.1).to(device)
+    fake_label = torch.FloatTensor(b_size, ).uniform_(0.9, 1.0).to(device)
     criterion = nn.BCEWithLogitsLoss()
     
     
