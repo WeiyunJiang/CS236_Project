@@ -70,33 +70,44 @@ def hinge_loss_d(real_preds, fake_preds):
     return F.relu(1.0 - real_preds).mean() + F.relu(1.0 + fake_preds).mean()
 
 
-def compute_loss_g(net_g, net_d, sketch, colored_real, loss_func_g):
+def compute_loss_g(net_g, net_d, sketch, colored_real, loss_func_g, device):
     """
     General implementation to compute generator loss.
     """
-    criterion = nn.BCELoss()
     real_label = 1.
     fake_label = 0.
-
+    criterion = nn.BCELoss()
+    b_size = colored_real.size(0)
+    label = torch.full((b_size,), real_label, dtype=torch.float, device=device)
     loss_l1 = nn.L1Loss()
     fakes = net_g(sketch)
     fake_preds = net_d(sketch, fakes).view(-1)
     
     # loss_g = loss_func_g(fake_preds) + 100 * loss_l1(fakes, colored_real)
     #loss_g = loss_func_g(fake_preds)                             
-    loss_g = criterion(fake_preds, )
+    loss_g = criterion(fake_preds, label)
     return loss_g, fakes, fake_preds
 
 
-def compute_loss_d(net_g, net_d, colored_real, sketch, loss_func_d):
+def compute_loss_d(net_g, net_d, colored_real, sketch, loss_func_d, device):
     """
     General implementation to compute discriminator loss.
     """
-
+    real_label = 1.
+    fake_label = 0.
+    criterion = nn.BCELoss()
+    b_size = colored_real.size(0)
+    label = torch.full((b_size,), real_label, dtype=torch.float, device=device)
+    
     real_preds = net_d(sketch, colored_real).view(-1)
+    errD_real = criterion(real_preds, label)
+    
+    label.fill_(fake_label)
     fakes = net_g(sketch).detach()
     fake_preds = net_d(sketch, fakes).view(-1)
-    loss_d = loss_func_d(real_preds, fake_preds)
+    errD_fake = criterion(fake_preds, label)
+    # loss_d = loss_func_d(real_preds, fake_preds)
+    loss_d = errD_real + errD_fake
 
     return loss_d, fakes, real_preds, fake_preds
 
@@ -154,6 +165,7 @@ def evaluate(net_g, net_d, dataloader, device):
                 colored_real,
                 sketch,
                 hinge_loss_d,
+                device,
             )
             loss_g, _, _ = compute_loss_g(
                 net_g,
@@ -161,6 +173,7 @@ def evaluate(net_g, net_d, dataloader, device):
                 sketch,
                 colored_real,
                 hinge_loss_g,
+                device,
             )
 
             # Update metrics
