@@ -154,6 +154,7 @@ def evaluate(net_g, net_d, dataloader, device):
                 net_g,
                 net_d,
                 sketch,
+                colored_real,
                 hinge_loss_g,
             )
 
