@@ -76,7 +76,7 @@ def compute_loss_g(net_g, net_d, sketch, colored_real, loss_func_g, device):
     """
     real_label = 1.
     fake_label = 0.
-    criterion = nn.BCELoss()
+    criterion = nn.BCEWithLogitsLoss()
     b_size = colored_real.size(0)
     label_real = torch.full((b_size,), real_label, dtype=torch.float, device=device)
     loss_l1 = nn.L1Loss()
@@ -95,7 +95,7 @@ def compute_loss_d(net_g, net_d, colored_real, sketch, loss_func_d, device):
     """
     real_label = 1.
     fake_label = 0.
-    criterion = nn.BCELoss()
+    criterion = nn.BCEWithLogitsLoss()
     b_size = colored_real.size(0)
     label_real = torch.full((b_size,), real_label, dtype=torch.float, device=device)
     
