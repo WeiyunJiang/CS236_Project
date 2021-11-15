@@ -45,6 +45,23 @@ def prepare_data_for_cgan(data, device):
         colored,
     )
 
+def prepare_data_for_cgan_z(data, device):
+    """
+    Helper function to prepare inputs for model.
+    """
+    #print(type(data))
+    sketch = data['sketch'].to(device)
+    colored = data['colored'].to(device)
+    batch_size = sketch.size(0)
+    resolution = (sketch.size(2), sketch.size(3))
+    z = torch.randn((batch_size, 1, *resolution)).to(device)
+    return (
+        sketch,
+        colored,
+        z
+    )
+
+
 
 def compute_prob(logits):
     """
@@ -70,7 +87,7 @@ def hinge_loss_d(real_preds, fake_preds):
     return F.relu(1.0 - real_preds).mean() + F.relu(1.0 + fake_preds).mean()
 
 
-def compute_loss_g(net_g, net_d, sketch, colored_real, loss_func_g, device):
+def compute_loss_g(net_g, net_d, sketch, colored_real, z, loss_func_g, device):
     """
     General implementation to compute generator loss.
     """
@@ -86,7 +103,7 @@ def compute_loss_g(net_g, net_d, sketch, colored_real, loss_func_g, device):
     b_size = colored_real.size(0)
     label_real = torch.full((b_size,), real_label, dtype=torch.float, device=device)
     loss_l1 = nn.L1Loss()
-    fakes = net_g(sketch)
+    fakes = net_g(sketch, z)
     fake_preds = net_d(sketch, fakes).view(-1)
     
     # loss_g = loss_func_g(fake_preds) + 100 * loss_l1(fakes, colored_real)
@@ -95,7 +112,7 @@ def compute_loss_g(net_g, net_d, sketch, colored_real, loss_func_g, device):
     return loss_g, fakes, fake_preds
 
 
-def compute_loss_d(net_g, net_d, colored_real, sketch, loss_func_d, device):
+def compute_loss_d(net_g, net_d, colored_real, sketch, z, loss_func_d, device):
     """
     General implementation to compute discriminator loss.
     """
@@ -114,7 +131,7 @@ def compute_loss_d(net_g, net_d, colored_real, sketch, loss_func_d, device):
     real_preds = net_d(sketch, colored_real).view(-1)
     errD_real = criterion(real_preds, real_label)
     
-    fakes = net_g(sketch).detach()
+    fakes = net_g(sketch, z).detach()
     fake_preds = net_d(sketch, fakes).view(-1)
     errD_fake = criterion(fake_preds, fake_label)
     # loss_d = loss_func_d(real_preds, fake_preds)
@@ -169,12 +186,14 @@ def evaluate(net_g, net_d, dataloader, device):
         for _, data in enumerate(tqdm(dataloader, desc="Evaluating Model")):
 
             # Compute losses and save intermediate outputs
-            sketch, colored_real = prepare_data_for_cgan(data, device)
+            # sketch, colored_real = prepare_data_for_cgan(data, device)
+            sketch, colored_real, z = prepare_data_for_cgan_z(data, device)
             loss_d, fakes, real_pred, fake_pred = compute_loss_d(
                 net_g,
                 net_d,
                 colored_real,
                 sketch,
+                z,
                 hinge_loss_d,
                 device,
             )
@@ -183,6 +202,7 @@ def evaluate(net_g, net_d, dataloader, device):
                 net_d,
                 sketch,
                 colored_real,
+                z,
                 hinge_loss_g,
                 device,
             )
@@ -323,7 +343,7 @@ class Trainer:
         self.logger.add_image("Samples", samples, self.step)
         self.logger.flush()
 
-    def _train_step_g(self, sketch, colored_real):
+    def _train_step_g(self, sketch, colored_real, z):
         """
         Performs a generator training step.
         """
@@ -337,12 +357,13 @@ class Trainer:
                 self.net_d,
                 sketch,
                 colored_real,
+                z,
                 hinge_loss_g,
                 self.device,
             )[0],
         )
 
-    def _train_step_d(self, colored_real, sketch):
+    def _train_step_d(self, colored_real, sketch, z):
         """
         Performs a discriminator training step.
         """
@@ -356,6 +377,7 @@ class Trainer:
                 self.net_d,
                 colored_real,
                 sketch,
+                z,
                 hinge_loss_d,
                 self.device,
             )[0],
@@ -380,10 +402,10 @@ class Trainer:
                 # Training step
                 # reals, z = prepare_data_for_gan(data, self.nz, self.device)
                 #print(data)
-                sketch, colored_real = prepare_data_for_cgan(data, self.device)
-                loss_d = self._train_step_d(colored_real, sketch)
+                sketch, colored_real, z = prepare_data_for_cgan_z(data, self.device)
+                loss_d = self._train_step_d(colored_real, sketch, z)
                 if self.step % repeat_d == 0:
-                    loss_g = self._train_step_g(sketch, colored_real)
+                    loss_g = self._train_step_g(sketch, colored_real, z)
 
                 pbar.set_description(
                     f"L(G):{loss_g.item():.2f}|L(D):{loss_d.item():.2f}|{self.step}/{max_steps}"

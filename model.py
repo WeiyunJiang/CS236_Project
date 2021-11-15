@@ -244,6 +244,46 @@ class cGenerator64(nn.Module):
     
         return out
     
+class cGenerator64_z(nn.Module):
+    def __init__(self):
+        super(cGenerator64, self).__init__()
+        
+        self.enc_layer1=ConvBlock(4, 8)
+        self.enc_layer2=ConvBlock(8, 16)
+        self.enc_layer3=ConvBlock(16, 32)
+        self.enc_layer4=ConvBlock(32, 64)
+        # self.enc_layer5=ConvBlock(64, 128)
+        self.bottleneck=ConvBlock(64, 128, kernel_size=4, stride=1, padding=0)
+    
+        self.dec_layer1=ConvTranBlock(128, 64, kernel_size=4,stride=1,padding=0)
+        self.dec_layer2=ConvTranBlock(128, 32)
+        self.dec_layer3=ConvTranBlock(64, 16)
+        self.dec_layer4=ConvTranBlock(32, 8)
+        self.dec_layer5=ConvTranBlock(16, 3)
+        # self.dec_layer6=ConvTranBlock(12, 3)
+        self.dec_layer7=nn.ConvTranspose2d(6,3,kernel_size=1,stride=1,padding=0)
+
+    def forward(self, x, z):
+        # x (-1, 3, 64, 64)
+        x = x.view(-1, 3, 64, 64)
+        z = z.view(-1, 1, 64, 64)
+        x_cat=torch.cat([z, x],1)  # (-1, 4, 64, 64)
+        enc1 = self.enc_layer1(x) # (-1,8,32,32)
+        enc2 = self.enc_layer2(enc1) # (-1,16,16,16)
+        enc3 = self.enc_layer3(enc2)  # (-1,32,8,8)
+        enc4 = self.enc_layer4(enc3)  # (-1,64,4,4)
+        # enc5 = self.enc_layer5(enc4) #  (-1,128,2,2)
+        latent = self.bottleneck(enc4) # (-1,128,1,1)
+        dec1 = torch.cat([self.dec_layer1(latent), enc4], 1)  # (-1,128,4,4)
+        dec2 = torch.cat([self.dec_layer2(dec1), enc3], 1)    # (-1,64,8,8)
+        dec3 = torch.cat([self.dec_layer3(dec2), enc2], 1)    # (-1,32,16,16)
+        dec4 = torch.cat([self.dec_layer4(dec3), enc1], 1)    # (-1,16,32,32)
+        dec5 = torch.cat([self.dec_layer5(dec4), x], 1)    # (-1,6,64,64)
+        # dec6 = torch.cat([self.dec_layer6(dec5), x], 1)      # (-1,3,64,64)
+        out = self.dec_layer7(dec5) # (-1,3,64,64)
+    
+        return out
+
 class cDiscriminator64(nn.Module):
     # x is the sketch
     # y is the colored on (real or fake)
