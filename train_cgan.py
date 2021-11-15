@@ -149,7 +149,7 @@ def train(args):
     # Configure models
     
     if args.im_size == 64:
-        net_g = cGenerator64()
+        net_g = cGenerator64_z()
         net_d = cDiscriminator64()
     else:
         raise NotImplementedError(f"Unsupported image size '{args.im_size}'.")
