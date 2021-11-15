@@ -246,7 +246,7 @@ class cGenerator64(nn.Module):
     
 class cGenerator64_z(nn.Module):
     def __init__(self):
-        super(cGenerator64, self).__init__()
+        super(cGenerator64_z, self).__init__()
         
         self.enc_layer1=ConvBlock(4, 8)
         self.enc_layer2=ConvBlock(8, 16)
@@ -267,8 +267,9 @@ class cGenerator64_z(nn.Module):
         # x (-1, 3, 64, 64)
         x = x.view(-1, 3, 64, 64)
         z = z.view(-1, 1, 64, 64)
+        
         x_cat=torch.cat([z, x],1)  # (-1, 4, 64, 64)
-        enc1 = self.enc_layer1(x) # (-1,8,32,32)
+        enc1 = self.enc_layer1(x_cat) # (-1,8,32,32)
         enc2 = self.enc_layer2(enc1) # (-1,16,16,16)
         enc3 = self.enc_layer3(enc2)  # (-1,32,8,8)
         enc4 = self.enc_layer4(enc3)  # (-1,64,4,4)
