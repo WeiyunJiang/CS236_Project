@@ -285,6 +285,52 @@ class cGenerator64_z(nn.Module):
     
         return out
 
+class cGenerator256_z(nn.Module):
+    def __init__(self):
+        super(cGenerator256_z, self).__init__()
+        
+        self.enc_layer1=ConvBlock(4, 8)
+        self.enc_layer2=ConvBlock(8, 16)
+        self.enc_layer3=ConvBlock(16, 32)
+        self.enc_layer4=ConvBlock(32, 64)
+        self.enc_layer5=ConvBlock(64, 128)
+        self.enc_layer6=ConvBlock(128, 256)
+        self.bottleneck=ConvBlock(256, 512, kernel_size=4, stride=1, padding=0)
+    
+        self.dec_layer1=ConvTranBlock(512, 256, kernel_size=4,stride=1,padding=0)
+        self.dec_layer2=ConvTranBlock(512, 128)
+        self.dec_layer3=ConvTranBlock(256, 64)
+        self.dec_layer4=ConvTranBlock(128, 32)
+        self.dec_layer5=ConvTranBlock(64, 16)
+        self.dec_layer6=ConvTranBlock(32, 8)
+        self.dec_layer7=ConvTranBlock(16, 3)
+        
+        self.dec_layer8=nn.ConvTranspose2d(6,3,kernel_size=1,stride=1,padding=0)
+
+    def forward(self, x, z):
+        # x (-1, 3, 256, 256)
+        x = x.view(-1, 3, 256, 256)
+        z = z.view(-1, 1, 256, 256)
+        
+        x_cat=torch.cat([z, x],1)  # (-1, 4, 256, 256)
+        enc1 = self.enc_layer1(x_cat) # (-1,8,128,128)
+        enc2 = self.enc_layer2(enc1) # (-1,16,64,64)
+        enc3 = self.enc_layer3(enc2)  # (-1,32,32,32)
+        enc4 = self.enc_layer4(enc3)  # (-1,64,16,16)
+        enc5 = self.enc_layer5(enc4) #  (-1,128,8,8)
+        enc6 = self.enc_layer6(enc5) #  (-1,256,4,4)
+        latent = self.bottleneck(enc6) # (-1,512,1,1)
+        dec1 = torch.cat([self.dec_layer1(latent), enc6], 1)  # (-1,512,4,4)
+        dec2 = torch.cat([self.dec_layer2(dec1), enc5], 1)    # (-1,256,8,8)
+        dec3 = torch.cat([self.dec_layer3(dec2), enc4], 1)    # (-1,128,16,16)
+        dec4 = torch.cat([self.dec_layer4(dec3), enc3], 1)    # (-1,64,32,32)
+        dec5 = torch.cat([self.dec_layer5(dec4), enc2], 1)    # (-1,32,64,64)
+        dec6 = torch.cat([self.dec_layer6(dec5), enc1], 1)    # (-1,16,128,128)
+        dec7 = torch.cat([self.dec_layer7(dec6), x], 1)      # (-1,6,256,256)
+        out = self.dec_layer8(dec7) # (-1,3,256,256)
+    
+        return out
+
 class cDiscriminator64(nn.Module):
     # x is the sketch
     # y is the colored on (real or fake)
@@ -307,18 +353,44 @@ class cDiscriminator64(nn.Module):
         label=out.view(-1,1)
         
         return label #real/fake
+    
+class cDiscriminator256(nn.Module):
+    # x is the sketch
+    # y is the colored on (real or fake)
+    def __init__(self):
+        super(cDiscriminator256, self).__init__()
+        self.model=nn.Sequential( #(-1, 6, 256, 256)
+            ConvBlock(6,8), #(-1, 8, 128, 128)
+            ConvBlock(8,16), #(-1, 16, 64, 64)
+            ConvBlock(16,32), #(-1, 32, 32, 32)
+            ConvBlock(32,64),  #(-1, 64, 16, 16)
+            ConvBlock(64,128), #(-1, 128, 8, 8)
+            ConvBlock(128,256), #(-1, 256, 4, 4)
+            nn.Conv2d(256,1,kernel_size=4,stride=1,padding=0),#(-1, 1, 1, 1)
+            nn.Sigmoid(),
+        )
+    def forward(self,x,y):
+        x=x.view(-1, 3, 256, 256)
+        y=y.view(-1, 3, 256, 256)
+        concat=torch.cat([x,y], 1) #(-1, 6, 256, 256)
+        out=self.model(concat) # 
+        label=out.view(-1,1)
+        
+        return label #real/fake
+    
 
 if __name__ == "__main__":
-    cgenerator = cGenerator64()
+    cgenerator = cGenerator256_z()
     
-    input_x = torch.zeros((60, 3, 64, 64))
-    out = cgenerator(input_x) 
+    input_x = torch.zeros((60, 3, 256, 256))
+    input_z = torch.zeros((60, 1, 256, 256))
+    out = cgenerator(input_x, input_z) 
     print(out.shape)
     
-    cdiscriminator = cDiscriminator64()
+    cdiscriminator = cDiscriminator256()
     
-    sketch = torch.zeros((60, 3, 64, 64))
-    colored = torch.zeros((60, 3, 64, 64))
+    sketch = torch.zeros((60, 3, 256, 256))
+    colored = torch.zeros((60, 3, 256, 256))
     out = cdiscriminator(sketch, colored) 
     print(out.shape)
     

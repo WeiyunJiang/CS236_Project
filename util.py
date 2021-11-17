@@ -40,7 +40,7 @@ def get_dataloaders_cgan(data_dir, imsize, batch_size, train_size, eval_size, nu
     Creates a dataloader from a directory containing image data.
     """
 
-    dataset = AnimeDataset(split='train')
+    dataset = AnimeDataset(split='train', resolution=imsize)
     eval_dataset, train_dataset, _ = torch.utils.data.random_split(
         dataset,
         [eval_size, train_size, len(dataset) - train_size - eval_size],

@@ -69,7 +69,7 @@ def parse_args():
     parser.add_argument(
         "--im_size",
         type=int,
-        default=64,
+        default=256,
         help=(
             "Images are resized to this resolution. "
             "Models are automatically selected based on resolution."
@@ -151,6 +151,9 @@ def train(args):
     if args.im_size == 64:
         net_g = cGenerator64_z()
         net_d = cDiscriminator64()
+    elif args.im_size == 256:
+        net_g = cGenerator256_z()
+        net_d = cDiscriminator256()
     else:
         raise NotImplementedError(f"Unsupported image size '{args.im_size}'.")
 
