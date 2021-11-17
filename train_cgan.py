@@ -171,7 +171,7 @@ def train(args):
 
     # Configure dataloaders
     train_dataloader, eval_dataloader = util.get_dataloaders_cgan(
-        args.data_dir, args.im_size, args.batch_size, train_size, eval_size, num_workers
+        args.data_dir, (args.im_size, args.im_size), args.batch_size, train_size, eval_size, num_workers
     )
 
     # Configure trainer
