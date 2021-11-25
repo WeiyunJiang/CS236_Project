@@ -55,7 +55,6 @@ if __name__ == "__main__":
     
     train_dataset = AnimeDataset(split='train', resolution = (256, 256))
     test_dataset = AnimeDataset(split='test', resolution = (256, 256))
-    train_dataset[0]
     
     train_data_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
     test_data_loader = DataLoader(test_dataset, batch_size=64, shuffle=False)
