@@ -11,7 +11,7 @@ import util
 from model import *
 from trainer_cgan import evaluate, prepare_data_for_cgan, prepare_data_for_inception
 
-def test_log(self, metrics, samples, logger):
+def test_log(metrics, samples, logger):
         r"""
         Logs metrics and samples to Tensorboard.
         """
