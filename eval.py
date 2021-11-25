@@ -8,7 +8,7 @@ from torchmetrics.image.fid import NoTrainInceptionV3
 
 import util
 from model import *
-from trainer_cgan import evaluate, prepare_data_for_gan, prepare_data_for_inception
+from trainer_cgan import evaluate, prepare_data_for_cgan, prepare_data_for_inception
 
 
 def parse_args():
