@@ -5,12 +5,22 @@ import argparse
 from tqdm import tqdm
 import torch
 from torchmetrics.image.fid import NoTrainInceptionV3
+import torch.utils.tensorboard as tbx
 
 import util
 from model import *
 from trainer_cgan import evaluate, prepare_data_for_cgan, prepare_data_for_inception
 
+def test_log(self, metrics, samples, logger):
+        r"""
+        Logs metrics and samples to Tensorboard.
+        """
 
+        for k, v in metrics.items():
+            logger.add_scalar(k, v, 1)
+        logger.add_image("Samples", samples, 1)
+        logger.flush()
+        
 def parse_args():
     r"""
     Parses command line arguments.
@@ -92,7 +102,12 @@ def eval(args):
     r"""
     Evaluates specified checkpoint.
     """
-
+    folder_path =  os.path.dirname(args.out_dir, args.name)
+    log_path = os.path.join(folder_path, "log_test")
+    for d in [log_path]:
+        if not os.path.exists(d):
+            os.mkdir(d)
+    logger = tbx.SummaryWriter(log_path)
     # Set parameters
     nz, eval_size, num_workers = (
         128,
@@ -120,7 +135,7 @@ def eval(args):
 
     # Configures eval dataloader
     _, _, test_dataloader = util.get_dataloaders_cgan(
-        args.data_dir, (args.im_size, args.im_size), args.batch_size, eval_size, num_workers, data_aug=False,
+        args.data_dir, (args.im_size, args.imsize), args.batch_size, eval_size, num_workers, data_aug=False,
     )
 
     if args.submit:
@@ -129,9 +144,9 @@ def eval(args):
 
     else:
         # Evaluate models
-        metrics, _ = evaluate(net_g, net_d, test_dataloader, args.device)
+        metrics, sample = evaluate(net_g, net_d, test_dataloader, args.device)
         pprint.pprint(metrics)
-
+        test_log(metrics, sample, logger)
 
 if __name__ == "__main__":
     eval(parse_args())
