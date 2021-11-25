@@ -102,7 +102,7 @@ def eval(args):
     r"""
     Evaluates specified checkpoint.
     """
-    folder_path =  os.path.dirname(args.out_dir, args.name)
+    folder_path =  os.path.dirname(args.ckpt_path)
     log_path = os.path.join(folder_path, "log_test")
     for d in [log_path]:
         if not os.path.exists(d):
