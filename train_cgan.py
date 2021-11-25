@@ -18,7 +18,16 @@ import util
 from model import *
 from trainer_cgan import Trainer
 
-
+def str2bool(v):
+    if isinstance(v, bool):
+        return v
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
+        
 def parse_args():
     r"""
     Parses command line arguments.
@@ -108,6 +117,14 @@ def parse_args():
         default=("cuda:0" if torch.cuda.is_available() else "cpu"),
         help="Device to train on.",
     )
+    parser.add_argument(
+        "--data_aug",
+        type=str2bool, 
+        nargs='?',
+        const=True, 
+        default=False,
+        help='data augmentation or not',
+    )
 
     return parser.parse_args()
 
@@ -171,7 +188,8 @@ def train(args):
 
     # Configure dataloaders
     train_dataloader, eval_dataloader = util.get_dataloaders_cgan(
-        args.data_dir, (args.im_size, args.im_size), args.batch_size, train_size, eval_size, num_workers
+        args.data_dir, (args.im_size, args.im_size), 
+        args.batch_size, train_size, eval_size, args.data_aug, num_workers
     )
 
     # Configure trainer
