@@ -108,7 +108,8 @@ def compute_loss_g(net_g, net_d, sketch, colored_real, z, loss_func_g, device):
     
     # loss_g = loss_func_g(fake_preds) + 100 * loss_l1(fakes, colored_real)
     #loss_g = loss_func_g(fake_preds)                             
-    loss_g = criterion(fake_preds, label_real)
+    #loss_g = criterion(fake_preds, label_real)
+    loss_g = criterion(fake_preds, label_real) + 100 * loss_l1(fakes, colored_real)
     return loss_g, fakes, fake_preds
 
 
