@@ -146,7 +146,7 @@ def eval(args):
         # Evaluate models
         metrics, sample = evaluate(net_g, net_d, test_dataloader, args.device)
         pprint.pprint(metrics)
-        test_log(metrics, sample, logger=logger)
+        test_log(metrics=metrics, samples=sample, logger=logger)
 
 if __name__ == "__main__":
     eval(parse_args())
