@@ -35,7 +35,7 @@ def get_dataloaders(data_dir, imsize, batch_size, eval_size, num_workers=1):
 
     return train_dataloader, eval_dataloader  
 
-def get_dataloaders_cgan(data_dir, imsize, batch_size, train_size, eval_size, data_aug, num_workers=1):
+def get_dataloaders_cgan(data_dir, imsize, batch_size, train_size, eval_size, num_workers=1, data_aug=False):
     r"""
     Creates a dataloader from a directory containing image data.
     """

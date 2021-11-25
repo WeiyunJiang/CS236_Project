@@ -8,7 +8,7 @@ from torchmetrics.image.fid import NoTrainInceptionV3
 
 import util
 from model import *
-from trainer import evaluate, prepare_data_for_gan, prepare_data_for_inception
+from trainer_cgan import evaluate, prepare_data_for_gan, prepare_data_for_inception
 
 
 def parse_args():
@@ -27,7 +27,8 @@ def parse_args():
     parser.add_argument(
         "--ckpt_path",
         type=str,
-        required=True,
+        default = "out/cgan_z_256_1116/ckpt/110000.pth",
+        # required=True,
         help="Path to checkpoint used for evaluation.",
     )
     parser.add_argument(
@@ -106,6 +107,9 @@ def eval(args):
     elif args.im_size == 64:
         net_g = Generator64()
         net_d = Discriminator64()
+    elif args.im_size == 256:
+        net_g = cGenerator256_z()
+        net_d = cDiscriminator256()
     else:
         raise NotImplementedError(f"Unsupported image size '{args.im_size}'.")
 
@@ -115,8 +119,8 @@ def eval(args):
     net_d.load_state_dict(state_dict["net_d"])
 
     # Configures eval dataloader
-    _, eval_dataloader = util.get_dataloaders(
-        args.data_dir, args.im_size, args.batch_size, eval_size, num_workers
+    _, eval_dataloader = util.get_dataloaders_cgan(
+        args.data_dir, args.im_size, args.batch_size, eval_size, num_workers, data_aug=False,
     )
 
     if args.submit:

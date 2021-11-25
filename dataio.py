@@ -19,6 +19,7 @@ class AnimeDataset(Dataset):
         self.downsample = downsample
         self.resolution = resolution
         self.data_aug = data_aug
+        self.split = split
         if split == "train":
             self.root_dir = "./anime_data/train/"
             with open('train_filenames', 'rb') as f:
