@@ -47,10 +47,10 @@ def get_dataloaders_cgan(data_dir, imsize, batch_size, train_size, eval_size, nu
         [eval_size, train_size, len(dataset) - train_size - eval_size],
     )
     #
-    test_dataset, _  = torch.utils.data.random_split(
-        test_dataset,
-        [1000, len(test_dataset) - 1000],
-    )
+    # test_dataset, _  = torch.utils.data.random_split(
+    #     test_dataset,
+    #     [1000, len(test_dataset) - 1000],
+    # )
     #
     test_dataloader = torch.utils.data.DataLoader(
         test_dataset,
