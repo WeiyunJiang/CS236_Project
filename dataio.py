@@ -52,7 +52,7 @@ class AnimeDataset(Dataset):
         if self.downsample: # downsample the image to reduce storage
             colored = colored.resize(self.resolution)
             sketch = sketch.resize(self.resolution)
-        if self.data_aug is True:
+        if self.data_aug is True and self.split == "train":
             # hflip with p = 0.5
             if random.random() > 0.5:
                 colored = TF.hflip(colored)

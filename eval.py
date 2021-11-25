@@ -119,17 +119,17 @@ def eval(args):
     net_d.load_state_dict(state_dict["net_d"])
 
     # Configures eval dataloader
-    _, eval_dataloader = util.get_dataloaders_cgan(
+    _, _, test_dataloader = util.get_dataloaders_cgan(
         args.data_dir, args.im_size, args.batch_size, eval_size, num_workers, data_aug=False,
     )
 
     if args.submit:
         # Generate leaderboard submission
-        generate_submission(net_g, eval_dataloader, nz, args.device)
+        generate_submission(net_g, test_dataloader, nz, args.device)
 
     else:
         # Evaluate models
-        metrics, _ = evaluate(net_g, net_d, eval_dataloader, nz, args.device)
+        metrics, _ = evaluate(net_g, net_d, test_dataloader, args.device)
         pprint.pprint(metrics)
 
 
