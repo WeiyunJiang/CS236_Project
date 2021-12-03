@@ -234,6 +234,7 @@ def evaluate(net_g, net_d, dataloader, device):
 
         # Create samples
         # if samples_z is not None:
+        print(sketch.shape)
         samples = net_g(sketch[:10], z[:10]) 
         sketch_up = F.interpolate(sketch[:10], 256).cpu() # 10 x 3 x 64 x 64
         samples_up = F.interpolate(samples, 256).cpu() # 10 x 3 x 64 x 64
