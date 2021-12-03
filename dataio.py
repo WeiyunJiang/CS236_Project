@@ -40,7 +40,7 @@ class AnimeDataset(Dataset):
                 ])    
             
     def __len__(self):
-        return 1
+        return 3
     
     def __getitem__(self, idx):
         # filename = self.filenames[idx]
