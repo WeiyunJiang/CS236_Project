@@ -25,8 +25,8 @@ class AnimeDataset(Dataset):
             with open('train_filenames', 'rb') as f:
                 self.filenames = pickle.load(f)
         elif split == "test":
-            self.root_dir = "./anime_data/val/"
-            with open('val_filenames', 'rb') as f:
+            self.root_dir = "./anime_data/test/"
+            with open('test_filenames', 'rb') as f:
                 self.filenames = pickle.load(f)
         else:
             raise NotImplementedError('Not implemented for name={split}')
