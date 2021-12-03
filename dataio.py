@@ -43,7 +43,8 @@ class AnimeDataset(Dataset):
         return len(self.filenames)
     
     def __getitem__(self, idx):
-        filename = self.filenames[idx]
+        # filename = self.filenames[idx]
+        filename = "1841032.png"
         pth = self.root_dir + filename
         image_pair = Image.open(pth)
         width, height = image_pair.size
