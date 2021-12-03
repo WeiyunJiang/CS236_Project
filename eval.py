@@ -137,7 +137,7 @@ def eval(args):
     _, _, test_dataloader = util.get_dataloaders_cgan(
         args.data_dir, (args.im_size, args.im_size), args.batch_size, eval_size, num_workers, data_aug=False,
     )
-
+    
     if args.submit:
         # Generate leaderboard submission
         generate_submission(net_g, test_dataloader, nz, args.device)

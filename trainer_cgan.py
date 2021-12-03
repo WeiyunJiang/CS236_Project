@@ -215,11 +215,11 @@ def evaluate(net_g, net_d, dataloader, device):
             fake_preds.append(compute_prob(fake_pred))
             reals = prepare_data_for_inception(colored_real, device)
             fakes = prepare_data_for_inception(fakes, device)
-            is_.update(fakes)
-            fid.update(reals, real=True)
-            fid.update(fakes, real=False)
-            kid.update(reals, real=True)
-            kid.update(fakes, real=False)
+            # is_.update(fakes)
+            # fid.update(reals, real=True)
+            # fid.update(fakes, real=False)
+            # kid.update(reals, real=True)
+            # kid.update(fakes, real=False)
 
         # Process metrics
         metrics = {
@@ -227,9 +227,9 @@ def evaluate(net_g, net_d, dataloader, device):
             "L(D)": torch.stack(loss_ds).mean().item(),
             "D(x)": torch.stack(real_preds).mean().item(),
             "D(G(z))": torch.stack(fake_preds).mean().item(),
-            "IS": is_.compute()[0].item(),
-            "FID": fid.compute().item(),
-            "KID": kid.compute()[0].item(),
+            # "IS": is_.compute()[0].item(),
+            # "FID": fid.compute().item(),
+            # "KID": kid.compute()[0].item(),
         }
 
         # Create samples
