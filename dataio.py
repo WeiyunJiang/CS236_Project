@@ -40,7 +40,7 @@ class AnimeDataset(Dataset):
                 ])    
             
     def __len__(self):
-        return 3
+        return len(self.filenames) if self.split == "train" else 1
     
     def __getitem__(self, idx):
         # filename = self.filenames[idx]
